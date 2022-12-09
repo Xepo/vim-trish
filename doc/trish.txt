@@ -1,5 +1,3 @@
-# vim-trish
-
 *trish.txt* personal knowledge management in vim
 *trish* 
 
@@ -32,14 +30,20 @@ Missing features compared to obsidian:
 	  obsidian and trish.
 	- No graph view
 	- No sync.  I use a combo of iCoud and git.
+	- probably others
 
-WARNING: I make no promises that this won't delete your entire world.  Back up everything, use git (or other services) to make sure that you can undo any changes you make through this script.  (That said, I use this script daily myself, and I've tried to use good coding habits so nothing like this will happen.  But I'm just one dev, and your setup being different than mine may make it behave weirdly)
+WARNING: I make no promises that this won't delete your entire world.  Back up
+everything, use git (or other services) to make sure that you can undo any
+changes you make through this script.  (That said, I use this script daily
+myself, and I've tried to use good coding habits so nothing like this will
+happen.  But I'm just one dev, and your setup being different than mine may
+make it behave weirdly)
 
 ================================================================================
 BASIC USAGE *trish-basic-usage*
 
 TODO: check if tab completion works without supertab
-Requirements: vim-supertab
+Requirements: vim-supertab, and running on unix or ipad.  (I don't expect this to work on windows due to the lack of grep or find commands)
 Optional: you probably want ctrlp or fzf or another fuzzy file searched
 installed to help you jumped between files.
 
@@ -51,8 +55,8 @@ throughout your notes to both add links and references to concepts.
 
 You should probably put ephemeral information in your daily notes ("this is
 what was done this day, this is what was discussed, this is the current
-status" with good tags so it shows up int he addendum), and more permanent
-information outside your daily notes.
+status" with good tags so it shows up in the addendum for those tags), and put
+more permanent information outside your daily notes.
 
 
 ================================================================================
@@ -64,8 +68,9 @@ you to nest tags.  #music/wilco/yankee-hotel-foxtrot is a child-tag of
 
 Tab-completion should work with existing tags.
 
-Tags can have files associated with them, stored at basedir/tagname.md, e.g. the file for
-#books/the-mind-illuminated is stored at trish-basedir/books/the-mind-illuminated.md
+Tags can have files associated with them, stored at basedir/tagname.md, e.g.
+the file for #books/the-mind-illuminated is stored at
+trish-basedir/books/the-mind-illuminated.md
 
 *trish-jumping-to-tags* 
 You can jump to a tag's file using vim's standard tag navigation.  With your
@@ -76,6 +81,9 @@ your last location.  See vim docs for more info.
 When you type a tag, then hit space, trish will open up the file for that tag
 in the preview window.  This allows you to quickly check what you've recently
 written about that tag before you continue.  
+
+<CR> in normal mode will save the current file, and refresh the auto-preview if
+your cursor is now over another tag.
 
 *trish-tag-limitations*
 Limitations: 
@@ -106,27 +114,33 @@ you up and I can provide a flag.
 <leader>n -- Go to next file. If you're not currently in a daily file, take you to tomorrow's.
 #tdt expands to the tag for the current daily file.
 
-TODO: get rid of the space in this file.
-*trish-daily-template*
-When trish creates a new daily file for today, it'll default to using the contents from "templates/daily template.md". If you wish to embed the current date, include the string: {{date:YYY-MM-DD}}
+================================================================================
+TEMPLATES *trish-templates*
+When you open a new file in trish, it'll check for a template to use.  templates are stored in templates/, and are selected based on the directory of the file.  So, for daily/ notes, the template should be located at template/daily.md.
+
+If you wish to embed the current date, include the string: {{date:YYY-MM-DD}}.  (this'll try to use the date from the filename if it's there, otherwise it'll use today)
 
 LIMITATIONS: templates is a barely implemented feature, but suffices for my
 needs:
-- The only supported template is the daily one
 - You can't actually use a different date format. The replacement text it's replacing is taken from obsidian.
 
 ================================================================================
-ADDENDUMS *trish-working-with-tags* 
+ADDENDUMS *trish-addendums* 
 
 Any time you open a markdown file in trish, it adds an addendum to the end of
 the file.  This also works in auto preview (see [[trish-auto-preview]]). This addendum contains:
 
-- Backlinks, with your daily notes backlinks sorted first
+- Backlinks, with your daily notes backlinks sorted first.  
 - Parent and child tags
 - If on iOS, any conflicting files, see [[trish-ios-conflicts]]
 
 This addendum is not saved with the file.  The addendum is removed before the
 file is saved.
+
+ARCHIVING *trish-archiving*
+
+Create a directory named archive, and move notes in there.  Then those notes
+won't be scanned for backlinks.
 
 ================================================================================
 TAG ALIASES *trish-tag-aliases* *tag-aliases.cfg*
@@ -145,6 +159,9 @@ For example:
 
 Will rewrite all of those listed tags into either #space/jwst or #space/iss.
 
+Note that this doesn't rewrite any pre-existing usage of those tags.  Run your
+own sed commands.
+
 ================================================================================
 OUTLINING *trish-outlining*
 
@@ -162,6 +179,7 @@ the cursor (to prevent from interfering with tab-completion for tags):
 	<Tab> - Indent current line and children lines
 	<S-Tab> - Unindent current line and children lines
 
+================================================================================
 AUTODASH *trish-autodash* *g:trish_autodash*
 
 Trish will add a dash for you at at the beginning of new lines, since a dash starts a list and I mostly use nested lists.  You can turn it off by setting g:trish_autodash to anything other than 'y'.
@@ -173,13 +191,13 @@ I use an iPad as my daily driver for notes, which means everything in here is
 compatible with iVim. This means I didn't take advantage of some vim features
 that aren't compatible with iVim. 
 
-STORAGE *trish-ios-notes-storage*
+IOS STORAGE *trish-ios-notes-storage*
 Consider using [iexdir] to add an iCloud directory to be accessible from iVim.
 Also consider using that to store your .vim elsewhere.  
 I use working copy to keep history and sync my notes to other systems outside
 of apple.  I have a daily shortcut that commits the entire directory.
 
-JUMPING TO OBSIDIAN *trish-ios-jumping-to-obsidian*
+IOS JUMPING TO OBSIDIAN *trish-ios-jumping-to-obsidian*
 In case you'd find it useful, the below mapping will let you open the current
 file up in obsidian. You'll have to replace nameofvault with the name of the
 vault in obsidian
@@ -194,13 +212,29 @@ put the conflicted file as 'filename 2.md', with the number increasing as it
 finds more conflicts or the existing one doesn't get resolved.  This can be
 super annoying.
 
-Trish will look for these conflicts, and report it in the addendum.  Put your cursor over one of the conflicts and hit <leader>df to diff the conflicted file with your current one.
+Trish will look for these conflicts, and report it in the addendum.  Put your
+cursor over one of the conflicts and hit <leader>df to diff the conflicted
+file with your current one.
 
 I've heard that opening the directory in the files app will force a sync.  Use
 command-U to make that happen for the current file.
 
 (If anyone knows a reliable way of making these less frequent from vim, let me
 know)
+
+================================================================================
+PHILOSOPHY *trish-philosophy*
+
+Here's some of my thoughts on the choices I made.
+
+- The main feature I wanted is auto-preview.  This is because I'm often taking
+  notes where I don't have control over how fast the information is coming in,
+  like in a meeting.  I want my system to remind me of recent happenings as
+  that's going, I don't want to have to click through to find it.
+- I use my daily-note for today as my main jumping off point.  My primary way
+  of navigating around is to type a tag into the daily note, then jump to it.
+  This is true even if I just want to see a note.  This gives me a log of the
+  things I did today and that I wanted to view.
 
 ================================================================================
 NOTE FROM DEV *trish-note-from-dev*
@@ -210,3 +244,23 @@ choices in here, and I've only really tested this on iOS and a little on
 ubuntu.  I hope this all works for you.  I'm happy to do a little work to get
 it to fit your particular needs, but I do have a full-time job and don't wanna
 overpromise.
+
+================================================================================
+TODO *trish-todo*
+
+Want to do:
+- Fix minor unreliability in the addendum since using job_start
+- Support [[]] link formats, instead of just the '#' format
+- Saved searches (i.e. list of tags that are all searched together).  Maybe
+  associated tags that are filled out in the addendum too. (i.e. when you pull
+  up an author's page, you may want any lines relating to any books they've
+  written to also show up in the addendum)
+- Better support for images, somehow.  
+- Some way of pulling in entire blocks in the addendum, instead of just
+  single lines
+- the backlinks search is less precise than it should be -- if one tag is a prefix of another tag, the other tag will be pulled into its backlinks.  This seems desirable if they're children, but kinda sucky if they just happen to conflict
+- Maybe should highlight background of # sections to distinguish them more
+
+Probably won't do:
+- Support more markdown, probably by using one of the preexisting markdown plugins 
+- tables
