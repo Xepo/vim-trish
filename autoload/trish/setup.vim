@@ -84,6 +84,11 @@ endfunction
 function trish#setup#setup(dir) abort
 	call trish#setup#runtests()
 
+	" A lot of code here is dependent on the current directory being your
+	" notes root.  I've tried to rewrite it, but weirdnesses on the iPad have
+	" fought me on it.
+	set noautochdir 
+
 	exe 'cd ' . a:dir
 	let l:dir = fnamemodify(a:dir, ':p')
 	let g:trish#dir = l:dir

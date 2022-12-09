@@ -26,7 +26,7 @@ endfunction
 
 function! trish#indent#should_tab_complete() 
 	if col('.') == 1
-		return v:true
+		return v:false
 	endif
 
 	let l:line = getline('.')

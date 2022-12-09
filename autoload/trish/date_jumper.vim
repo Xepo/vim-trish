@@ -53,14 +53,6 @@ function! trish#date_jumper#go_to_today() abort
 	let l:file = 'daily/' . l:date . '.md'
 
 	exe ':e ' . l:file
-
-	" TODO:  Get rid of this in favor of the new_md autocommand
-	if s:BufferIsEmpty()
-		:0r templates/daily template.md
-		exe ':%s;{{date:YYYY-MM-DD}};' . l:date . ';g'
-		:%g/^$/d
-		normal gg
-	endif
 endfunction
 "function! ListNearbyDates() abort
 "	let l:date = expand("%")

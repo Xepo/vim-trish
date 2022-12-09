@@ -18,7 +18,7 @@ CONTENTS   *trish-contents*
 ================================================================================
 INTRO *trish-intro*
 
-Personal knowledge management, like obsidian or logseq, fully within vim.  Very fast for my notes, which has ~1500 files, working on an iPad.
+A highly opinionated personal knowledge management plugin for vim.  Think obsidian or logseq, but within vim.  Very fast for my notes, which has ~1500 files, working on an iPad.
 
 Killer feature: As you're typing your notes, it'll use the preview window to show you related notes.   Anytime you hit space, it'll check if you just typed a tag, and if so, will open that note in the preview window, with backlinks.
 
@@ -42,10 +42,9 @@ make it behave weirdly)
 ================================================================================
 BASIC USAGE *trish-basic-usage*
 
-TODO: check if tab completion works without supertab
-Requirements: vim-supertab, and running on unix or ipad.  (I don't expect this to work on windows due to the lack of grep or find commands)
+Requirements: linux or ipad, vim not neovim. (I don't expect this to work on windows due to the lack of grep or find commands)
 Optional: you probably want ctrlp or fzf or another fuzzy file searched
-installed to help you jumped between files.
+installed to help you jumpe between files.
 
 Use this command to get started:
 :TrishSetup <dirname>
@@ -137,6 +136,12 @@ the file.  This also works in auto preview (see [[trish-auto-preview]]). This ad
 This addendum is not saved with the file.  The addendum is removed before the
 file is saved.
 
+REFS *trish-refs*
+If the first line of a markdown file ends with "ref: <space separated list of
+tags>", then trish will include backlinks to those tags in the addendum as
+well.
+Note: This one is a bit of an experiment.  I haven't used this feature much and may remove it.
+
 ARCHIVING *trish-archiving*
 
 Create a directory named archive, and move notes in there.  Then those notes
@@ -178,6 +183,13 @@ These work in normal mode, and in insert mode when there's whitespace before
 the cursor (to prevent from interfering with tab-completion for tags):
 	<Tab> - Indent current line and children lines
 	<S-Tab> - Unindent current line and children lines
+
+Sections *trish-sections*
+[[ - Jump to previous # header section
+]] - Jump to next # header section
+[2 - Jump to previous ## header section
+]2 - Jump to next ## header section
+
 
 ================================================================================
 AUTODASH *trish-autodash* *g:trish_autodash*
@@ -249,18 +261,20 @@ overpromise.
 TODO *trish-todo*
 
 Want to do:
+- Make it work with neovim
 - Fix minor unreliability in the addendum since using job_start
 - Support [[]] link formats, instead of just the '#' format
-- Saved searches (i.e. list of tags that are all searched together).  Maybe
+- Saved searches (i.e. list of tags that are all searched together).  Maybe 
   associated tags that are filled out in the addendum too. (i.e. when you pull
   up an author's page, you may want any lines relating to any books they've
-  written to also show up in the addendum)
+  written to also show up in the addendum) (See |trish-refs| for initial implementation)
 - Better support for images, somehow.  
 - Some way of pulling in entire blocks in the addendum, instead of just
   single lines
+- Transclusions
 - the backlinks search is less precise than it should be -- if one tag is a prefix of another tag, the other tag will be pulled into its backlinks.  This seems desirable if they're children, but kinda sucky if they just happen to conflict
-- Maybe should highlight background of # sections to distinguish them more
 
 Probably won't do:
 - Support more markdown, probably by using one of the preexisting markdown plugins 
 - tables
+
