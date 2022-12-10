@@ -23,7 +23,12 @@ endfunction
 
 function! trish#backlinks#updatecache() abort
 	let l:files = s:get_root_files()
-	let l:cmd = ['egrep', '-H', '-n', '--directories=recurse', '-e', "'#[a-z]'"] + l:files
+	let l:expression = '#[a-z]'
+	if has("ios")
+		" For whatever reason, iVim seems to require extra quoting for this
+		let l:expression = "'" . l:expression . "'"
+	endif
+	let l:cmd = ['egrep', '-H', '-n', '--directories=recurse', '-e', l:expression] + l:files
 	call job_start(l:cmd, {'out_io':'file' , 'out_name':trish#backlinks#cache_file() , 'err_io':'file' , 'err_name':trish#backlinks#cache_error_file() , 'exit_cb': 'trish#backlinks#updatecache_callback' })
 endfunction
 

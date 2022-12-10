@@ -4,8 +4,10 @@ let s:last_updated_tags_time = 0
 
 function s:preview_filename_if_under_cursor()
 	  let l:word = trim(expand('<cWORD>'), '=')
-	  if l:word =~ '^[a-z0-9 /-]*.md:[0-9]*'
-		  let [l:file,l:lnum] = split(l:word, ':')
+	  if l:word =~ '^[a-z0-9 /-]*.md:[0-9]*:'
+		  let l:args = split(l:word, ':')
+		  let l:file = l:args[0]
+		  let l:lnum = l:args[1]
 		  exe ":topleft pedit +" . l:lnum . " " . l:file
 	  endif
 endfunction
