@@ -2,9 +2,10 @@
 function! trish#setup#hashtag_highlighting() abort
 	syntax clear
 	syntax match hashtag /\(#[a-z0-9/-]\+\)/
-	hi hashtag ctermfg=Green guifg=Green
+	syntax match hashtag /\(%[a-z0-9/-]\+\)/
+	hi hashtag ctermfg=LightBlue guifg=LightBlue
 	syntax match userhashtag ^\(#u/[a-z0-9/-]*\)^
-	hi userhashtag ctermfg=LightBlue guifg=LightBlue
+	hi userhashtag ctermfg=Green guifg=Green
 	syntax match header /^\(\s\|-\)*\zs#\s.*/
 	syntax match header /^---.*/
 	hi header term=underline gui=underline
@@ -29,7 +30,10 @@ function! trish#setup#bufreadmd()
 	setlocal ts=4 shiftwidth=4
 
 	inoreabbrev <buffer> #tdt #daily/<c-r>=strftime('%Y-%m-%d')<CR>
-	inoremap <buffer> <space> <c-]><space><c-o>:silent call trish#preview#update()<CR>
+	" This mapping used to have <c-]> at the beginningo f it, before the
+	" <space><c-o>, but I can't figure out why I put it there.  Try removing
+	" it
+	inoremap <buffer> <space> <space><c-o>:silent call trish#preview#update()<CR>
 	nnoremap <buffer> <CR> :update<CR>:call trish#preview#update()<CR>
 	nnoremap <buffer> <S-Tab> :call trish#indent#indent('<')<CR>
 	nnoremap <buffer> <Tab> :call trish#indent#indent('>')<CR>
@@ -45,6 +49,10 @@ function! trish#setup#bufreadmd()
 
 	nnoremap <buffer> [2 :call search('\m^\(\s\\|-\)*##\s\\|^---', 'bsW' )<CR>
 	nnoremap <buffer> ]2 :call search('\m^\(\s\\|-\)*##\s\\|^---', 'sW' )<CR>
+
+	nnoremap <buffer> - :call trish#backlinks#jump_to_adjacent_usage(-1)<CR>
+	nnoremap <buffer> + :call trish#backlinks#jump_to_adjacent_usage(1)<CR>
+
 	if !exists('g:trish_autodash') || g:trish_autodash == 'y'
 		inoremap <buffer> <buffer> <CR> <CR>-<Space>
 	endif
@@ -52,7 +60,6 @@ endfunction
 
 function trish#setup#load_template_if_needed()
 	let l:template_name = 'templates/' . trim(expand('%:h'), '/') . '.md'
-	let g:dbg = l:template_name
 	if filereadable(l:template_name)
 		let l:date = expand('%:t:r')
 		if l:date !~ '\d\d\d\d-\d\d-\d\d'
@@ -61,6 +68,10 @@ function trish#setup#load_template_if_needed()
 
 		exe "0r " . l:template_name
 		exe ':%s;{{date:YYYY-MM-DD}};' . l:date . ';ge'
+
+		let l:tag = trish#tag#tag_for_filename(expand('%'))
+
+		exe ':%s;{{tagname}};' . l:tag . ';ge'
 		%g/^$/d _
 		normal gg
 	endif
@@ -78,6 +89,12 @@ function trish#setup#runtests() abort
 	let l:ret += trish#addendum#runtests()
 	if l:ret > 0
 		throw "Trish unit tests failed: " . string(v:errors)
+	endif
+endfunction
+
+function trish#setup#new_md_if_needed() abort
+	if line('$') == 1 && trim(getline(1)) == ''
+		call trish#setup#new_md()
 	endif
 endfunction
 
@@ -105,7 +122,17 @@ function trish#setup#setup(dir) abort
 	au filetype markdown call trish#setup#bufreadmd()
 	autocmd BufWritePre	*.md call mkdir(expand("%:h"), 'p')
 	autocmd BufNewFile	*.md lockmarks keepjumps call trish#setup#new_md()
+	autocmd BufReadPost	*.md lockmarks keepjumps call trish#setup#new_md_if_needed()
+
+	" When opening file, put cursor in last place it was when it was closed.
+	" Lifted from the vim help manual
+    autocmd BufReadPost *.md
+      \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+      \ |   exe "normal! g`\""
+      \ | endif
+
 	augroup END
+
 
 	set tagfunc=trish#tag#tagfunc
 	set tagcase=ignore

@@ -25,11 +25,10 @@ function! trish#indent#indent(in_or_out)
 endfunction
 
 function! trish#indent#should_tab_complete() 
-	if col('.') == 1
+	let l:line = getline('.')
+	if l:line =~ '^\(-\|\s\)*$' || col('.') == 1
 		return v:false
 	endif
-
-	let l:line = getline('.')
 	let l:ch = l:line[col('.')-2]
 	let g:ln = l:line
 	let g:ch = l:ch

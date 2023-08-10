@@ -7,11 +7,12 @@ Killer feature: As you're typing your notes, it'll use the preview window to sho
 Other features: backlinks, fast jumping, block indent/unindent, daily notes, tags are links.
 
 Missing features compared to obsidian:
-
-* No images, no tables, no formatting.  The "markdown" in the filename is a bit of a lie, but it means you can easily share the same notes between obsidian and trish.
-* No graph view
-* No sync.  I use a combo of iCoud and git.
-* probably others
+	- No images, no tables, no formatting.  The "markdown" in the filename is
+	  a bit of a lie, but it means you can easily share the same notes between
+	  obsidian and trish.
+	- No graph view
+	- No sync.  I use a combo of iCoud and git.
+	- probably others
 
 WARNING: I make no promises that this won't delete your entire world.  Back up
 everything, use git (or other services) to make sure that you can undo any

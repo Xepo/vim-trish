@@ -10,6 +10,15 @@ function! trish#tag#get_tag_before_or_under_cursor()
 	endif
 endfunction
 
+function! trish#tag#get_tag_under_before_or_after_cursor()
+	let l:tag = trish#tag#get_tag_before_or_under_cursor()
+	if l:tag == ""
+		let l:tag = matchstr(getline('.'), '#[^#][^#]*')
+	endif
+	
+	return l:tag
+endfunction
+
 function trish#tag#extract_tags_from_string(str) abort
 	let l:lst = []
 	let l:tags = substitute(a:str, '#[a-z0-9/-][a-z0-9/-]*', '\=add(l:lst, submatch(0))', 'g')
@@ -75,6 +84,24 @@ endfunction
 "	endif
 "endfunction
 "
+
+
+function trish#tag#filename_for_tag(tag)
+	return trim(a:tag, '#%') . '.md'
+endfunction
+
+let g:trish_tag_sameplace_cursor = []
+let g:trish_tag_sameplace_time = reltime()
+
+function! trish#tag#same_place_as_before()
+	let l:old_cursor = g:trish_tag_sameplace_cursor
+	let l:old_time = g:trish_tag_sameplace_time
+	let g:trish_tag_sameplace_cursor = getcurpos()
+	let g:trish_tag_sameplace_time = reltime()
+
+	return g:trish_tag_sameplace_cursor == l:old_cursor && reltimefloat(reltime(l:old_time, g:trish_tag_sameplace_time)) < 5.0
+endfunction
+
 function! trish#tag#tagfunc(pattern, flags, info)
 	if a:flags == 'c'
 		let l:loc = trish#tag#grab_file_and_num_under_cursor()
@@ -84,6 +111,22 @@ function! trish#tag#tagfunc(pattern, flags, info)
 		endif
 
 		let l:w = expand('<cWORD>')
+
+
+		if l:w =~ '[%#][a-z0-9/-]\+' 
+			let l:fn = trish#tag#filename_for_tag(l:w)
+
+			if trish#tag#same_place_as_before()
+				if !filereadable(l:fn)
+					call mkdir(fnamemodify(l:fn, ':h'), 'p')
+					call writefile([], l:fn, 'a')
+				endif
+
+			endif
+
+			return [{'name':l:w, 'filename':l:fn, 'cmd':'0'}]
+		endif
+
 		if l:w =~ '%[a-z0-9/-]\+'
 			return taglist('#' . trim(l:w, '%'))
 		endif
@@ -92,10 +135,17 @@ function! trish#tag#tagfunc(pattern, flags, info)
 	return v:null
 endfun
 
-function trish#tag#filename_for_tag(tag)
-	return trim(a:tag, '#') . '.md'
+function trish#tag#tag_for_filename(filename)
+	if a:filename !~ '.*\.md'
+		throw 'Invalid argument to trish#tag#tag_for_filename.  Expected md file.'
+	endif
+
+	return '#' . fnamemodify(a:filename, ':r')
 endfunction
 
-function trish#tag#runtests()
-	return assert_equal(trish#tag#extract_tags_from_string('#asdf #c/sdf-wer # #sdf-sdf werwer cvdsf'), ['#asdf', '#c/sdf-wer', '#sdf-sdf'])
+function trish#tag#runtests() abort
+	let l:ret = 0
+    let l:ret += assert_equal(trish#tag#extract_tags_from_string('#asdf #c/sdf-wer # #sdf-sdf werwer cvdsf'), ['#asdf', '#c/sdf-wer', '#sdf-sdf'])
+	let l:ret += assert_equal(trish#tag#tag_for_filename('books/enders-game.md'), '#books/enders-game')
+	return l:ret
 endfunction

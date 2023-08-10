@@ -29,13 +29,12 @@ function! s:find_backlinks(tag) abort
 endfunction
 
 function! s:get_parents(tag) abort
-	let l:tag = a:tag
 	let l:parents = []
-	while l:tag =~ '.*/.*'
-		let l:tag = substitute(l:tag, '/.*$', '', '')
-		if l:tag != a:tag && l:tag 
-			let l:parents += [l:tag]
-		endif
+	let l:components = split(a:tag, '/')
+
+	while len(l:components) >= 2
+		unlet l:components[-1]
+		let l:parents += [join(l:components, '/')]
 	endwhile
 
 	if len(l:parents) > 0 && (l:parents[-1] == '#u' || l:parents[-1] == '#daily' || l:parents[-1] == '#p' || l:parents[-1] == '#g' || l:parents[-1] == 'recurring')
@@ -62,7 +61,16 @@ function! s:find_children() abort
 	return l:children
 endfunction
 
+function! trish#addendum#remove() abort
+	let l:view = winsaveview()
+	normal gg
+	exe 'silent! :/^\n\?' . s:addendum_special_line . '/,$d _'
+	call winrestview(l:view)
+endfunction 
+
 function! trish#addendum#append() abort
+	call trish#addendum#remove()
+
 	let l:view = winsaveview()
 	let l:tag = '#' . expand('%:r')
 
@@ -104,17 +112,10 @@ function! trish#addendum#append() abort
 	call winrestview(l:view)
 endfunction 
 
-function! trish#addendum#remove() abort
-	let l:view = winsaveview()
-	normal gg
-	exe 'silent! :/^\n\?' . s:addendum_special_line . '/,$d _'
-	call winrestview(l:view)
-endfunction 
-
 function! trish#addendum#setup() abort
 	augroup trish_addendum
 	au!
-	autocmd BufReadPost,FileReadPost	*.md lockmarks keepjumps call trish#addendum#append()
+	autocmd BufReadPost	*.md lockmarks keepjumps call trish#addendum#append()
 	autocmd BufWritePre	*.md keepjumps lockmarks call trish#addendum#remove()
 	autocmd BufWritePost	*.md keepjumps lockmarks call trish#addendum#append()
 	augroup END
@@ -126,4 +127,5 @@ function! trish#addendum#runtests() abort
 	let l:ret +=	assert_equal(s:extract_ref_from_string('asdfasdf #sdf ref: #ab #a/c-d'), ['#ab', '#a/c-d'])
 	let l:ret +=	assert_equal(s:extract_ref_from_string('asdfasdf #sdf'), [])
 
+	return l:ret
 endfunction
